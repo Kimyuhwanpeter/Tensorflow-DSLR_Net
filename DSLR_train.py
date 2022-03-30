@@ -5,7 +5,7 @@ from random import random
 import matplotlib.pyplot as plt
 import numpy as np
 import easydict
-# https://github.com/SeokjaeLIM/DSLR-release/blob/master/test.py
+
 FLAGS = easydict.EasyDict({"img_size": 256,
 
                            "tr_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light2/",
