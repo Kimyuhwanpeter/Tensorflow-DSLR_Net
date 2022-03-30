@@ -5,7 +5,7 @@ from random import random
 import matplotlib.pyplot as plt
 import numpy as np
 import easydict
-
+# https://github.com/SeokjaeLIM/DSLR-release/blob/master/test.py
 FLAGS = easydict.EasyDict({"img_size": 256,
 
                            "tr_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light2/",
@@ -25,6 +25,10 @@ FLAGS = easydict.EasyDict({"img_size": 256,
                            "sample_images": "C:/Users/Yuhwan/Downloads/sample_images",
                            
                            "save_checkpoint": "C:/Users/Yuhwan/Downloads/checkpoint",
+
+                           "pre_checkpoint": False,
+
+                           "pre_checkpoint_path": "",
                            
                            "te_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light2/",
                            
@@ -137,6 +141,18 @@ def main():
     Stage2.summary()
     Stage3.summary()
 
+    if FLAGS.pre_checkpoint:
+        ckpt = tf.train.Checkpoint(Stage1=Stage1, 
+                                    Stage2=Stage2,
+                                    Stage3=Stage3,
+                                    optim1=optim1,
+                                    optim2=optim2,
+                                    optim3=optim3)
+        ckpt_manager = tf.train.CheckpointManager(ckpt, FLAGS.pre_checkpoint_path, 5)
+        if ckpt_manager.latest_checkpoint:
+            ckpt.restore(ckpt_manager.latest_checkpoint)
+            print("Restored!!!")
+
     data_list = np.loadtxt(FLAGS.tr_txt_path, dtype="<U200", skiprows=0, usecols=0)
     img_data = [FLAGS.tr_img_path + data for data in data_list]
     img_data = np.array(img_data)
@@ -218,6 +234,7 @@ def main():
         te_iter = iter(te_gener)
         te_idx = len(img_data) // FLAGS.batch_size
         for step in range(te_idx):
+            print("Saving restored images....{}".format(step + 1))
             images = next(te_iter)
 
             x_down2 = tf.image.resize(batch_images, [int(batch_images.shape[1] / 2), int(batch_images.shape[2] / 2)])
