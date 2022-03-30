@@ -5,10 +5,11 @@ from random import random
 import matplotlib.pyplot as plt
 import numpy as np
 import easydict
-# https://github.com/SeokjaeLIM/DSLR-release/blob/master/test.py
+import os
+
 FLAGS = easydict.EasyDict({"img_size": 256,
 
-                           "tr_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light2/",
+                           "tr_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light/",
 
                            "tr_lab_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/raw_aug_rgb_img/",
                            
@@ -28,13 +29,11 @@ FLAGS = easydict.EasyDict({"img_size": 256,
 
                            "pre_checkpoint": False,
 
-                           "pre_checkpoint_path": "",
+                           "pre_checkpoint_path": "C:/Users/Yuhwan/Downloads/checkpoint",
                            
                            "te_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light2/",
                            
-                           "te_txt_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/test.txt",
-                           
-                           "test_images": "C:/Users/Yuhwan/Downloads/test_images"})
+                           "test_images": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/restored_low_light2"})
 
 scale1_loss = tf.keras.losses.MeanSquaredError()
 scale2_loss = tf.keras.losses.MeanSquaredError()
@@ -69,7 +68,7 @@ def tr_func(img_data, lab_data):
 
     return img, lab
 
-def te_func(img_data, lab_data):
+def te_func(img_data):
 
     img = tf.io.read_file(img_data)
     img = tf.image.decode_png(img, 3)
@@ -221,12 +220,11 @@ def main():
             ckpt.save(FLAGS.save_checkpoint + "/" + "DSLR_Net.ckpt")
 
     else:
-        data_list = np.loadtxt(FLAGS.te_txt_path, dtype="<U200", skiprows=0, usecols=0)
+        data_list = os.listdir(FLAGS.te_img_path)
         img_data = [FLAGS.te_img_path + data for data in data_list]
         img_data = np.array(img_data)
 
         te_gener = tf.data.Dataset.from_tensor_slices(img_data)
-        te_gener = te_gener.shuffle(len(img_data))
         te_gener = te_gener.map(te_func)
         te_gener = te_gener.batch(1)
         te_gener = te_gener.prefetch(tf.data.experimental.AUTOTUNE)
@@ -237,14 +235,14 @@ def main():
             print("Saving restored images....{}".format(step + 1))
             images = next(te_iter)
 
-            x_down2 = tf.image.resize(batch_images, [int(batch_images.shape[1] / 2), int(batch_images.shape[2] / 2)])
+            x_down2 = tf.image.resize(images, [int(images.shape[1] / 2), int(images.shape[2] / 2)])
             x_down4 = tf.image.resize(x_down2, [int(x_down2.shape[1] / 2), int(x_down2.shape[2] / 2)])
 
             x_reup2 = tf.image.resize(x_down4, [x_down4.shape[1]*2, x_down4.shape[2]*2])
             x_reup = tf.image.resize(x_down2, [x_down2.shape[1]*2, x_down2.shape[2]*2])
 
             Laplace_2 = x_down2 - x_reup2
-            Laplace_1 = batch_images - x_reup
+            Laplace_1 = images - x_reup
 
             Scale1 = Stage1(x_down4, False)
             Scale2 = Stage2(Laplace_2, False)
@@ -255,8 +253,7 @@ def main():
             output3 = tf.image.resize(output2, [output2.shape[1]*2, output2.shape[2]*2]) + Scale3
 
             name = img_data[step].split("/")[-1]
-            plt.imsave(FLAGS.sample_images + "/{}".format(name), output3[0] * 0.5 + 0.5)
-            plt.imsave(FLAGS.sample_images + "/{}".format(name), output3[1] * 0.5 + 0.5)
+            plt.imsave(FLAGS.test_images + "/{}".format(name), output3[0] * 0.5 + 0.5)
 
 
 if __name__ == "__main__":
