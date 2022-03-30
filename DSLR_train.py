@@ -237,9 +237,9 @@ def main():
             output2 = tf.image.resize(Scale1, [Scale1.shape[1]*2, Scale1.shape[2]*2]) + Scale2
             output3 = tf.image.resize(output2, [output2.shape[1]*2, output2.shape[2]*2]) + Scale3
 
-            name
-            plt.imsave(FLAGS.sample_images + "/{}_predict_0.png".format(count), output3[0] * 0.5 + 0.5)
-            plt.imsave(FLAGS.sample_images + "/{}_predict_1.png".format(count), output3[1] * 0.5 + 0.5)
+            name = img_data[step].split("/")[-1]
+            plt.imsave(FLAGS.sample_images + "/{}".format(name), output3[0] * 0.5 + 0.5)
+            plt.imsave(FLAGS.sample_images + "/{}".format(name), output3[1] * 0.5 + 0.5)
 
 
 if __name__ == "__main__":
