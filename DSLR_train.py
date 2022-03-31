@@ -9,11 +9,11 @@ import os
 
 FLAGS = easydict.EasyDict({"img_size": 256,
 
-                           "tr_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light/",
+                           "tr_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/CropWeed Field Image Dataset (CWFID)/dataset-1.0/low_light/",
 
-                           "tr_lab_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/raw_aug_rgb_img/",
+                           "tr_lab_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/CropWeed Field Image Dataset (CWFID)/dataset-1.0/aug_train_images/",
                            
-                           "tr_txt_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/train.txt",
+                           "tr_txt_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/CropWeed Field Image Dataset (CWFID)/dataset-1.0/train_fix.txt",
                            
                            "batch_size": 4,
                            
@@ -21,19 +21,19 @@ FLAGS = easydict.EasyDict({"img_size": 256,
                            
                            "lr": 0.0002,
 
-                           "train": True,
+                           "train": False,
 
                            "sample_images": "C:/Users/Yuhwan/Downloads/sample_images",
                            
                            "save_checkpoint": "C:/Users/Yuhwan/Downloads/checkpoint",
 
-                           "pre_checkpoint": False,
+                           "pre_checkpoint": True,
 
                            "pre_checkpoint_path": "C:/Users/Yuhwan/Downloads/checkpoint",
                            
-                           "te_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/low_light2/",
+                           "te_img_path": "D:/[1]DB/[5]4th_paper_DB/crop_weed/CropWeed Field Image Dataset (CWFID)/dataset-1.0/low_light/",
                            
-                           "test_images": "D:/[1]DB/[5]4th_paper_DB/crop_weed/datasets_IJRR2017/restored_low_light2"})
+                           "test_images": "D:/[1]DB/[5]4th_paper_DB/crop_weed/CropWeed Field Image Dataset (CWFID)/dataset-1.0/restored_low_light_DSLR"})
 
 scale1_loss = tf.keras.losses.MeanSquaredError()
 scale2_loss = tf.keras.losses.MeanSquaredError()
@@ -230,7 +230,7 @@ def main():
         te_gener = te_gener.prefetch(tf.data.experimental.AUTOTUNE)
 
         te_iter = iter(te_gener)
-        te_idx = len(img_data) // FLAGS.batch_size
+        te_idx = len(img_data) // 1
         for step in range(te_idx):
             print("Saving restored images....{}".format(step + 1))
             images = next(te_iter)
